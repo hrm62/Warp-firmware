@@ -24,8 +24,8 @@ enum
 {
 	kSSD1331PinMOSI		= GPIO_MAKE_PIN(HW_GPIOA, 8),
 	kSSD1331PinSCK		= GPIO_MAKE_PIN(HW_GPIOA, 9),
-	kSSD1331PinCSn		= GPIO_MAKE_PIN(HW_GPIOB, 13),
-	kSSD1331PinDC		= GPIO_MAKE_PIN(HW_GPIOA, 12),
+	kSSD1331PinCSn		= GPIO_MAKE_PIN(HW_GPIOA, 5),	// originally 13
+	kSSD1331PinDC		= GPIO_MAKE_PIN(HW_GPIOA, 7),	// originally 12
 	kSSD1331PinRST		= GPIO_MAKE_PIN(HW_GPIOB, 0),
 };
 
@@ -65,7 +65,6 @@ writeCommand(uint8_t commandByte)
 }
 
 
-
 int
 devSSD1331init(void)
 {
@@ -77,15 +76,16 @@ devSSD1331init(void)
 	PORT_HAL_SetMuxMode(PORTA_BASE, 8u, kPortMuxAlt3);
 	PORT_HAL_SetMuxMode(PORTA_BASE, 9u, kPortMuxAlt3);
 
-	enableSPIpins();
+	//enableSPIpins();
+	warpEnableSPIpins();
 
 	/*
 	 *	Override Warp firmware's use of these pins.
 	 *
 	 *	Reconfigure to use as GPIO.
 	 */
-	PORT_HAL_SetMuxMode(PORTB_BASE, 13u, kPortMuxAsGpio);
-	PORT_HAL_SetMuxMode(PORTA_BASE, 12u, kPortMuxAsGpio);
+	PORT_HAL_SetMuxMode(PORTA_BASE, 5u, kPortMuxAsGpio);
+	PORT_HAL_SetMuxMode(PORTA_BASE, 7u, kPortMuxAsGpio);
 	PORT_HAL_SetMuxMode(PORTB_BASE, 0u, kPortMuxAsGpio);
 
 
@@ -115,7 +115,7 @@ devSSD1331init(void)
 	writeCommand(kSSD1331CommandSETMASTER);		// 0xAD
 	writeCommand(0x8E);
 	writeCommand(kSSD1331CommandPOWERMODE);		// 0xB0
-	writeCommand(0x0B);
+	writeCommand(0x0B);							// Disable power save mode
 	writeCommand(kSSD1331CommandPRECHARGE);		// 0xB1
 	writeCommand(0x31);
 	writeCommand(kSSD1331CommandCLOCKDIV);		// 0xB3
@@ -131,14 +131,15 @@ devSSD1331init(void)
 	writeCommand(kSSD1331CommandVCOMH);		// 0xBE
 	writeCommand(0x3E);
 	writeCommand(kSSD1331CommandMASTERCURRENT);	// 0x87
-	writeCommand(0x06);
+	writeCommand(0xFF);
 	writeCommand(kSSD1331CommandCONTRASTA);		// 0x81
 	writeCommand(0x91);
 	writeCommand(kSSD1331CommandCONTRASTB);		// 0x82
-	writeCommand(0x50);
+	writeCommand(0xFF);
 	writeCommand(kSSD1331CommandCONTRASTC);		// 0x83
 	writeCommand(0x7D);
 	writeCommand(kSSD1331CommandDISPLAYON);		// Turn on oled panel
+	writeCommand(0xB9);							// Enable Linear Gray Scale Table
 
 	/*
 	 *	To use fill commands, you will have to issue a command to the display to enable them. See the manual.
@@ -161,7 +162,31 @@ devSSD1331init(void)
 	 *	Any post-initialization drawing commands go here.
 	 */
 	//...
-
+	
+	// Question 8: set whole screen to brightest green	
+	// Draw green rectangle covering whole screen
+	writeCommand(kSSD1331CommandDRAWRECT);
+	// Set start column addressto 0x00
+	writeCommand(0x00);
+	// Set start row address to 0x00
+	writeCommand(0x00);
+	// Set end col address to last column
+	writeCommand(0x5F);
+	// Set end row address to last row
+	writeCommand(0x3F);
+	// Set line colour C (R or B)
+	writeCommand(0x00);
+	// Set line colour B (G) - defined by bits 5:1, others are don't care so set all to 1
+	writeCommand(0xFF);
+	// Set line colour A (R or B)
+	writeCommand(0x00);
+	// Set fill colour C (R or B)
+	writeCommand(0x00);
+	// Set fill colour B (G) - defined by bits 5:1, others are don't care so set all to 1
+	writeCommand(0xFF);
+	// Set fill colour A (R or B)
+	writeCommand(0x00);
+	
 
 
 	return 0;
