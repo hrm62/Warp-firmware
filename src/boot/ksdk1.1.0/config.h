@@ -105,6 +105,7 @@
 	#define		WARP_BUILD_ENABLE_DEVSI4705		0
 	#define		WARP_BUILD_ENABLE_DEVSI7021		0
 	#define		WARP_BUILD_ENABLE_DEVTCS34725		0
+	#define		WARP_BUILD_ENABLE_DEVINA219		1
 #else
 	/*
 	 *	Otherwise: Edit these to set which code paths are activated in the firmware compilation
@@ -188,4 +189,5 @@ typedef enum
 	kWarpDefaultSupplyVoltageMillivoltsISL23415		= 1800,
 	kWarpDefaultSupplyVoltageMillivoltsAT45DB		= 1800,
 	kWarpDefaultSupplyVoltageMillivoltsICE40		= 1800,
+	kWarpDefaultSupplyVoltageMillivoltsINA219		= 1800,	// TODO check this - what does 1800 correspond to?
 } WarpDefaults;

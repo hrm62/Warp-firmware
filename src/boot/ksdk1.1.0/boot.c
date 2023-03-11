@@ -106,6 +106,11 @@
 	volatile WarpI2CDeviceState			deviceMMA8451QState;
 #endif
 
+#if (WARP_BUILD_ENABLE_DEVINA219)
+	#include "devINA219.h"
+	volatile WarpI2CDeviceState			deviceINA219State;
+#endif
+
 #if (WARP_BUILD_ENABLE_DEVLPS25H)
 	#include "devLPS25H.h"
 	volatile WarpI2CDeviceState			deviceLPS25HState;
@@ -1392,6 +1397,50 @@ warpWaitKey(void)
 }
 
 int
+readCurrentINA219(WarpStatus status)
+{
+	// Read shunt voltage value from register 0x01
+	volatile WarpI2CDeviceState *  i2cDeviceState = &deviceINA219State;
+	status = readSensorRegisterINA219(0x01, 2 /* numberOfBytes */);
+	// LSB corresponds to 10 uV
+	// Concatenate
+	uint8_t upper = i2cDeviceState->i2cBuffer[0];
+	uint8_t lower = i2cDeviceState->i2cBuffer[1];
+	uint16_t shuntVoltageReading = (upper << 8) + lower;
+	// warpPrint("\r Shunt voltage with upper: %d\n", shuntVoltageReading);
+	double shuntReadingToMicrovolts = 10;	// From datasheet
+	double senseResistorOhms = 0.1;			// From Adafruit board datasheet, multimeter reading 0.1-0.2 ohms (approaching resolution)
+	// Some embedded systems omit the ability to format floats so round to an int
+	int currentReading = shuntVoltageReading * shuntReadingToMicrovolts/senseResistorOhms;
+	// warpPrint("\r Current reading: %d microamperes\n", currentReading);
+	return currentReading;
+}
+
+int
+readBusVoltageINA219(WarpStatus status)
+{
+	// deviceINA219State is defined above if INA219 is enabled
+	volatile WarpI2CDeviceState *  i2cDeviceState = &deviceINA219State;
+	status = readSensorRegisterINA219(0x02, 2 /* numberOfBytes */);
+	// LSB corresponds to 4 mV
+	// Concatenate
+	uint8_t upper = i2cDeviceState->i2cBuffer[0];
+	uint8_t lower = i2cDeviceState->i2cBuffer[1];
+	// Only reading bits D15-D3
+	uint16_t lower2 = (uint16_t) lower >> 3;
+	uint16_t upper2 = (uint16_t) upper << 5;
+	//warpPrint("raw 0x%x 0x%x\n", upper2, lower2);
+	uint16_t busVoltageReading = upper2 + lower2;
+	//warpPrint("after shifting in hex 0x%x", busVoltageReading);
+	// warpPrint("\r Shunt voltage with upper: %d\n", shuntVoltageReading);
+	double busReadingToMillivolts = 4;	// From datasheet
+	// Some embedded systems omit the ability to format floats so round to an int
+	double BusReading = busVoltageReading * busReadingToMillivolts;
+	// warpPrint("\r Current reading: %d microamperes\n", currentReading);
+	return BusReading;
+}
+
+int
 main(void)
 {
 	WarpStatus				status;
@@ -1616,6 +1665,10 @@ main(void)
 	#if (WARP_BUILD_ENABLE_DEVMMA8451Q)
 		initMMA8451Q(	0x1D	/* i2cAddress */,	kWarpDefaultSupplyVoltageMillivoltsMMA8451Q	);
 		// address changed from 0x1C
+	#endif
+
+	#if (WARP_BUILD_ENABLE_DEVINA219)
+		initINA219(	0x40	/* i2cAddress */,	kWarpDefaultSupplyVoltageMillivoltsINA219	);
 	#endif
 
 	#if (WARP_BUILD_ENABLE_DEVLPS25H)
@@ -1997,8 +2050,21 @@ main(void)
 		}
 	#endif
 
-	// Question 8 - call devSSD1331 initialisation code
+	// CW2 Question 8 - call devSSD1331 initialisation code
 	devSSD1331init();
+
+	// CW3 Question 1: read current from INA219
+	// Print current values to terminal
+	// Can use RTT Viewer to log terminal output
+	warpPrint("Current (uA), Bus (mV)");
+	int i;
+	for (i=0; i<1000; i++)
+	{
+		int currentMicroamperes = readCurrentINA219(status);
+		int busMillivolts = readBusVoltageINA219(status);
+
+		warpPrint("%d, %d\n", currentMicroamperes, busMillivolts);
+	}
 
 	while (1)
 	{
@@ -2155,6 +2221,13 @@ main(void)
 					warpPrint("\r\t- 'k' AS7263			(0x00--0x2B): 2.7V -- 3.6V (compiled out) \n");
 				#endif
 
+				#if (WARP_BUILD_ENABLE_DEVINA219)
+					// Voltages may not be correct?  TODO
+					warpPrint("\r\t- 'l' INA219				(0x00--0x31): 1.95V -- 3.6V\n");
+				#else
+					warpPrint("\r\t- 'l' INA219				(0x00--0x31): 1.95V -- 3.6V (compiled out) \n");
+				#endif
+
 				warpPrint("\r\tEnter selection> ");
 				key = warpWaitKey();
 
@@ -2304,6 +2377,16 @@ main(void)
 						break;
 					}
 #endif
+
+					#if (WARP_BUILD_ENABLE_DEVINA219)
+						case 'l':
+						{
+							menuTargetSensor = kWarpSensorINA219;
+							menuI2cDevice = &deviceINA219State;
+							break;
+						}
+					#endif
+
 					default:
 					{
 						warpPrint("\r\tInvalid selection '%c' !\n", key);
@@ -3187,6 +3270,10 @@ printAllSensors(bool printHeadersAndCalibration, bool hexModeFlag, int menuDelay
 			warpPrint(" MMA8451 x, MMA8451 y, MMA8451 z,");
 		#endif
 
+		#if (WARP_BUILD_ENABLE_DEVINA219)
+			warpPrint(" INA219 Current,");
+		#endif
+
 		#if (WARP_BUILD_ENABLE_DEVMAG3110)
 			warpPrint(" MAG3110 x, MAG3110 y, MAG3110 z, MAG3110 Temp,");
 		#endif
@@ -3232,6 +3319,10 @@ printAllSensors(bool printHeadersAndCalibration, bool hexModeFlag, int menuDelay
 
 		#if (WARP_BUILD_ENABLE_DEVMMA8451Q)
 			printSensorDataMMA8451Q(hexModeFlag);
+		#endif
+
+		#if (WARP_BUILD_ENABLE_DEVINA219)
+			printSensorDataINA219(hexModeFlag);
 		#endif
 
 		#if (WARP_BUILD_ENABLE_DEVMAG3110)
@@ -3317,7 +3408,9 @@ loopForSensor(	const char *  tagString,
 	{
 		for (int i = 0; i < readCount; i++) for (int j = 0; j < chunkReadsPerAddress; j++)
 		{
-			status = readSensorRegisterFunction(address+j, 1 /* numberOfBytes */);
+			// TODO generalise this - make a variable - number of bytes to read should be 2 for certain registers
+			// but usually 1
+			status = readSensorRegisterFunction(address+j, 2 /* numberOfBytes */);
 			if (status == kWarpStatusOK)
 			{
 				nSuccesses++;
@@ -3352,9 +3445,11 @@ loopForSensor(	const char *  tagString,
 
 					if (chatty)
 					{
-						warpPrint("\r\t0x%02x --> 0x%02x\n",
+						warpPrint("\r\t0x%02x --> 0x%02x %02x\n",
 							address+j,
-							i2cDeviceState->i2cBuffer[0]);
+							i2cDeviceState->i2cBuffer[0], // changed from 0
+							i2cDeviceState->i2cBuffer[1]
+							);
 					}
 				}
 			}
@@ -3471,6 +3566,36 @@ repeatRegisterReadForDeviceAndAddress(WarpSensorDevice warpSensorDevice, uint8_t
 						);
 			#else
 				warpPrint("\r\n\tMMA8451Q Read Aborted. Device Disabled :(");
+			#endif
+
+			break;
+		}
+
+		case kWarpSensorINA219:
+		{
+			/*
+			 *	INA219: VDD ??? TODO
+			 */
+			#if (WARP_BUILD_ENABLE_DEVINA219)
+				loopForSensor(	"\r\nINA219:\n\r",		/*	tagString			*/
+						&readSensorRegisterINA219,	/*	readSensorRegisterFunction	*/
+						&deviceINA219State,		/*	i2cDeviceState			*/
+						NULL,				/*	spiDeviceState			*/
+						baseAddress,			/*	baseAddress			*/
+						//0x00,				/*basAddress*/
+						0x00,				/*	minAddress			*/
+						0x05,				/*	maxAddress			*/
+						repetitionsPerAddress,		/*	repetitionsPerAddress		*/
+						chunkReadsPerAddress,		/*	chunkReadsPerAddress		*/
+						spinDelay,			/*	spinDelay			*/
+						autoIncrement,			/*	autoIncrement			*/
+						sssupplyMillivolts,		/*	sssupplyMillivolts		*/
+						referenceByte,			/*	referenceByte			*/
+						adaptiveSssupplyMaxMillivolts,	/*	adaptiveSssupplyMaxMillivolts	*/
+						chatty				/*	chatty				*/
+						);
+			#else
+				warpPrint("\r\n\tINA219 Read Aborted. Device Disabled :(");
 			#endif
 
 			break;
