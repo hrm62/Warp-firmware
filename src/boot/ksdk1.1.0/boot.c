@@ -210,7 +210,7 @@ char							gWarpPrintBuffer[kWarpDefaultPrintBufferSizeBytes];
 uint8_t							gWarpSpiCommonSourceBuffer[kWarpMemoryCommonSpiBufferBytes];
 uint8_t							gWarpSpiCommonSinkBuffer[kWarpMemoryCommonSpiBufferBytes];
 
-static void						sleepUntilReset(void);
+// static void						sleepUntilReset(void);
 static void						lowPowerPinStates(void);
 
 #if (!WARP_BUILD_ENABLE_GLAUX_VARIANT && !WARP_BUILD_ENABLE_FRDMKL03)
@@ -370,24 +370,24 @@ callback0(power_manager_notify_struct_t *  notify, power_manager_callback_data_t
 
 
 
-void
-sleepUntilReset(void)
-{
-	while (1)
-	{
-		#if (WARP_BUILD_ENABLE_DEVSI4705)
-			GPIO_DRV_SetPinOutput(kWarpPinSI4705_nRST);
-		#endif
+// void
+// sleepUntilReset(void)
+// {
+// 	while (1)
+// 	{
+// 		#if (WARP_BUILD_ENABLE_DEVSI4705)
+// 			GPIO_DRV_SetPinOutput(kWarpPinSI4705_nRST);
+// 		#endif
 
-		warpLowPowerSecondsSleep(1, false /* forceAllPinsIntoLowPowerState */);
+// 		warpLowPowerSecondsSleep(1, false /* forceAllPinsIntoLowPowerState */);
 
-		#if (WARP_BUILD_ENABLE_DEVSI4705)
-			GPIO_DRV_ClearPinOutput(kWarpPinSI4705_nRST);
-		#endif
+// 		#if (WARP_BUILD_ENABLE_DEVSI4705)
+// 			GPIO_DRV_ClearPinOutput(kWarpPinSI4705_nRST);
+// 		#endif
 
-		warpLowPowerSecondsSleep(60, true /* forceAllPinsIntoLowPowerState */);
-	}
-}
+// 		warpLowPowerSecondsSleep(60, true /* forceAllPinsIntoLowPowerState */);
+// 	}
+// }
 
 
 void
@@ -1090,33 +1090,33 @@ warpDisableSupplyVoltage(void)
 }
 
 
-void
-warpLowPowerSecondsSleep(uint32_t sleepSeconds, bool forceAllPinsIntoLowPowerState)
-{
-	WarpStatus	status = kWarpStatusOK;
+// void
+// warpLowPowerSecondsSleep(uint32_t sleepSeconds, bool forceAllPinsIntoLowPowerState)
+// {
+// 	WarpStatus	status = kWarpStatusOK;
 
-	/*
-	 *	Set all pins into low-power states. We don't just disable all pins,
-	 *	as the various devices hanging off will be left in higher power draw
-	 *	state. And manuals say set pins to output to reduce power.
-	 */
-	if (forceAllPinsIntoLowPowerState)
-	{
-		lowPowerPinStates();
-	}
+// 	/*
+// 	 *	Set all pins into low-power states. We don't just disable all pins,
+// 	 *	as the various devices hanging off will be left in higher power draw
+// 	 *	state. And manuals say set pins to output to reduce power.
+// 	 */
+// 	if (forceAllPinsIntoLowPowerState)
+// 	{
+// 		lowPowerPinStates();
+// 	}
 
-	warpSetLowPowerMode(kWarpPowerModeVLPR, 0 /* Sleep Seconds */);
-	if ((status != kWarpStatusOK) && (status != kWarpStatusPowerTransitionErrorVlpr2Vlpr))
-	{
-		warpPrint("warpSetLowPowerMode(kWarpPowerModeVLPR, 0 /* sleep seconds : irrelevant here */)() failed...\n");
-	}
+// 	warpSetLowPowerMode(kWarpPowerModeVLPR, 0 /* Sleep Seconds */);
+// 	if ((status != kWarpStatusOK) && (status != kWarpStatusPowerTransitionErrorVlpr2Vlpr))
+// 	{
+// 		warpPrint("warpSetLowPowerMode(kWarpPowerModeVLPR, 0 /* sleep seconds : irrelevant here */)() failed...\n");
+// 	}
 
-	status = warpSetLowPowerMode(kWarpPowerModeVLPS, sleepSeconds);
-	if (status != kWarpStatusOK)
-	{
-		warpPrint("warpSetLowPowerMode(kWarpPowerModeVLPS, 0 /* sleep seconds : irrelevant here */)() failed...\n");
-	}
-}
+// 	status = warpSetLowPowerMode(kWarpPowerModeVLPS, sleepSeconds);
+// 	if (status != kWarpStatusOK)
+// 	{
+// 		warpPrint("warpSetLowPowerMode(kWarpPowerModeVLPS, 0 /* sleep seconds : irrelevant here */)() failed...\n");
+// 	}
+// }
 
 
 /*
@@ -1606,16 +1606,16 @@ main(void)
 	/*
 	 *	Switch CPU to Very Low Power Run (VLPR) mode
 	 */
-	if (WARP_BUILD_BOOT_TO_VLPR)
-	{
-		warpPrint("About to switch CPU to VLPR mode... ");
-		status = warpSetLowPowerMode(kWarpPowerModeVLPR, 0 /* Sleep Seconds */);
-		if ((status != kWarpStatusOK) && (status != kWarpStatusPowerTransitionErrorVlpr2Vlpr))
-		{
-			warpPrint("warpSetLowPowerMode(kWarpPowerModeVLPR() failed...\n");
-		}
-		warpPrint("done.\n\r");
-	}
+	// if (WARP_BUILD_BOOT_TO_VLPR)
+	// {
+	// 	warpPrint("About to switch CPU to VLPR mode... ");
+	// 	status = warpSetLowPowerMode(kWarpPowerModeVLPR, 0 /* Sleep Seconds */);
+	// 	if ((status != kWarpStatusOK) && (status != kWarpStatusPowerTransitionErrorVlpr2Vlpr))
+	// 	{
+	// 		warpPrint("warpSetLowPowerMode(kWarpPowerModeVLPR() failed...\n");
+	// 	}
+	// 	warpPrint("done.\n\r");
+	// }
 
 	/*
 	 *	Initialize the GPIO pins with the appropriate pull-up, etc.,
@@ -1900,155 +1900,155 @@ main(void)
 	gWarpBooted = true;
 	warpPrint("Boot done.\n");
 
-	#if (WARP_BUILD_BOOT_TO_CSVSTREAM)
-		printBootSplash(gWarpCurrentSupplyVoltage, menuRegisterAddress, &powerManagerCallbackStructure);
+	// #if (WARP_BUILD_BOOT_TO_CSVSTREAM)
+	// 	printBootSplash(gWarpCurrentSupplyVoltage, menuRegisterAddress, &powerManagerCallbackStructure);
 
-		/*
-		 *	Force to printAllSensors
-		 */
-		gWarpI2cBaudRateKbps = 300;
+	// 	/*
+	// 	 *	Force to printAllSensors
+	// 	 */
+	// 	gWarpI2cBaudRateKbps = 300;
 
-		if (!WARP_BUILD_BOOT_TO_VLPR)
-		{
-			status = warpSetLowPowerMode(kWarpPowerModeRUN, 0 /* sleep seconds : irrelevant here */);
-			if (status != kWarpStatusOK)
-			{
-				warpPrint("warpSetLowPowerMode(kWarpPowerModeRUN, 0 /* sleep seconds : irrelevant here */)() failed...\n");
-			}
-		}
+	// 	if (!WARP_BUILD_BOOT_TO_VLPR)
+	// 	{
+	// 		status = warpSetLowPowerMode(kWarpPowerModeRUN, 0 /* sleep seconds : irrelevant here */);
+	// 		if (status != kWarpStatusOK)
+	// 		{
+	// 			warpPrint("warpSetLowPowerMode(kWarpPowerModeRUN, 0 /* sleep seconds : irrelevant here */)() failed...\n");
+	// 		}
+	// 	}
 
-		warpScaleSupplyVoltage(3300);
-		printAllSensors(true /* printHeadersAndCalibration */, true /* hexModeFlag */, 0 /* menuDelayBetweenEachRun */, true /* loopForever */);
+	// 	warpScaleSupplyVoltage(3300);
+	// 	printAllSensors(true /* printHeadersAndCalibration */, true /* hexModeFlag */, 0 /* menuDelayBetweenEachRun */, true /* loopForever */);
 
-		/*
-		 *	Notreached
-		 */
-	#endif
+	// 	/*
+	// 	 *	Notreached
+	// 	 */
+	// #endif
 
-	#if (WARP_BUILD_ENABLE_GLAUX_VARIANT && WARP_BUILD_BOOT_TO_CSVSTREAM)
-		printBootSplash(gWarpCurrentSupplyVoltage, menuRegisterAddress, &powerManagerCallbackStructure);
+	// #if (WARP_BUILD_ENABLE_GLAUX_VARIANT && WARP_BUILD_BOOT_TO_CSVSTREAM)
+	// 	printBootSplash(gWarpCurrentSupplyVoltage, menuRegisterAddress, &powerManagerCallbackStructure);
 
-		#if (WARP_BUILD_ENABLE_DEVIS25xP)
-			warpPrint("About to read IS25xP JEDEC ID...\n");
-			//spiTransactionIS25xP({0x9F /* op0 */,  0x00 /* op1 */,  0x00 /* op2 */, 0x00 /* op3 */, 0x00 /* op4 */, 0x00 /* op5 */, 0x00 /* op6 */}, 5 /* opCount */);
-			warpPrint("IS25xP JEDEC ID = [0x%X] [0x%X] [0x%X]\n", deviceIS25xPState.spiSinkBuffer[1], deviceIS25xPState.spiSinkBuffer[2], deviceIS25xPState.spiSinkBuffer[3]);
+	// 	#if (WARP_BUILD_ENABLE_DEVIS25xP)
+	// 		warpPrint("About to read IS25xP JEDEC ID...\n");
+	// 		//spiTransactionIS25xP({0x9F /* op0 */,  0x00 /* op1 */,  0x00 /* op2 */, 0x00 /* op3 */, 0x00 /* op4 */, 0x00 /* op5 */, 0x00 /* op6 */}, 5 /* opCount */);
+	// 		warpPrint("IS25xP JEDEC ID = [0x%X] [0x%X] [0x%X]\n", deviceIS25xPState.spiSinkBuffer[1], deviceIS25xPState.spiSinkBuffer[2], deviceIS25xPState.spiSinkBuffer[3]);
 
-			warpPrint("About to read IS25xP Manufacturer ID...\n");
-			//spiTransactionIS25xP({0x90 /* op0 */,  0x00 /* op1 */,  0x00 /* op2 */, 0x00 /* op3 */, 0x00 /* op4 */, 0x00 /* op5 */, 0x00 /* op6 */}, 5 /* opCount */);
-			warpPrint("IS25xP Manufacturer ID = [0x%X] [0x%X] [0x%X]\n", deviceIS25xPState.spiSinkBuffer[3], deviceIS25xPState.spiSinkBuffer[4], deviceIS25xPState.spiSinkBuffer[5]);
+	// 		warpPrint("About to read IS25xP Manufacturer ID...\n");
+	// 		//spiTransactionIS25xP({0x90 /* op0 */,  0x00 /* op1 */,  0x00 /* op2 */, 0x00 /* op3 */, 0x00 /* op4 */, 0x00 /* op5 */, 0x00 /* op6 */}, 5 /* opCount */);
+	// 		warpPrint("IS25xP Manufacturer ID = [0x%X] [0x%X] [0x%X]\n", deviceIS25xPState.spiSinkBuffer[3], deviceIS25xPState.spiSinkBuffer[4], deviceIS25xPState.spiSinkBuffer[5]);
 
-			warpPrint("About to read IS25xP Flash ID (also releases low-power mode)...\n");
-			//spiTransactionIS25xP({0xAB /* op0 */,  0x00 /* op1 */,  0x00 /* op2 */, 0x00 /* op3 */, 0x00 /* op4 */, 0x00 /* op5 */, 0x00 /* op6 */}, 5 /* opCount */);
-			warpPrint("IS25xP Flash ID = [0x%X]\n", deviceIS25xPState.spiSinkBuffer[4]);
-		#endif
+	// 		warpPrint("About to read IS25xP Flash ID (also releases low-power mode)...\n");
+	// 		//spiTransactionIS25xP({0xAB /* op0 */,  0x00 /* op1 */,  0x00 /* op2 */, 0x00 /* op3 */, 0x00 /* op4 */, 0x00 /* op5 */, 0x00 /* op6 */}, 5 /* opCount */);
+	// 		warpPrint("IS25xP Flash ID = [0x%X]\n", deviceIS25xPState.spiSinkBuffer[4]);
+	// 	#endif
 
-		warpPrint("About to activate low-power modes (including IS25xP Flash)...\n");
-		activateAllLowPowerSensorModes(true /* verbose */);
+	// 	warpPrint("About to activate low-power modes (including IS25xP Flash)...\n");
+	// 	activateAllLowPowerSensorModes(true /* verbose */);
 
-		uint8_t	tmpRV8803RegisterByte;
-		status = readRTCRegisterRV8803C7(kWarpRV8803RegSec, &tmpRV8803RegisterByte);
-		if (status != kWarpStatusOK)
-		{
-			warpPrint("readRTCRegisterRV8803C7(kWarpRV8803RegSec, &tmpRV8803RegisterByte) failed\n");
-		}
-		else
-		{
-			warpPrint("kWarpRV8803RegSec = [0x%X]\n", tmpRV8803RegisterByte);
-		}
+	// 	uint8_t	tmpRV8803RegisterByte;
+	// 	status = readRTCRegisterRV8803C7(kWarpRV8803RegSec, &tmpRV8803RegisterByte);
+	// 	if (status != kWarpStatusOK)
+	// 	{
+	// 		warpPrint("readRTCRegisterRV8803C7(kWarpRV8803RegSec, &tmpRV8803RegisterByte) failed\n");
+	// 	}
+	// 	else
+	// 	{
+	// 		warpPrint("kWarpRV8803RegSec = [0x%X]\n", tmpRV8803RegisterByte);
+	// 	}
 
-		status = readRTCRegisterRV8803C7(kWarpRV8803RegMin, &tmpRV8803RegisterByte);
-		if (status != kWarpStatusOK)
-		{
-			warpPrint("readRTCRegisterRV8803C7(kWarpRV8803RegMin, &tmpRV8803RegisterByte) failed\n");
-		}
-		else
-		{
-			warpPrint("kWarpRV8803RegMin = [0x%X]\n", tmpRV8803RegisterByte);
-		}
+	// 	status = readRTCRegisterRV8803C7(kWarpRV8803RegMin, &tmpRV8803RegisterByte);
+	// 	if (status != kWarpStatusOK)
+	// 	{
+	// 		warpPrint("readRTCRegisterRV8803C7(kWarpRV8803RegMin, &tmpRV8803RegisterByte) failed\n");
+	// 	}
+	// 	else
+	// 	{
+	// 		warpPrint("kWarpRV8803RegMin = [0x%X]\n", tmpRV8803RegisterByte);
+	// 	}
 
-		status = readRTCRegisterRV8803C7(kWarpRV8803RegHour, &tmpRV8803RegisterByte);
-		if (status != kWarpStatusOK)
-		{
-			warpPrint("readRTCRegisterRV8803C7(kWarpRV8803RegHour, &tmpRV8803RegisterByte) failed\n");
-		}
-		else
-		{
-			warpPrint("kWarpRV8803RegHour = [0x%X]\n", tmpRV8803RegisterByte);
-		}
+	// 	status = readRTCRegisterRV8803C7(kWarpRV8803RegHour, &tmpRV8803RegisterByte);
+	// 	if (status != kWarpStatusOK)
+	// 	{
+	// 		warpPrint("readRTCRegisterRV8803C7(kWarpRV8803RegHour, &tmpRV8803RegisterByte) failed\n");
+	// 	}
+	// 	else
+	// 	{
+	// 		warpPrint("kWarpRV8803RegHour = [0x%X]\n", tmpRV8803RegisterByte);
+	// 	}
 
-		status = readRTCRegisterRV8803C7(kWarpRV8803RegExt, &tmpRV8803RegisterByte);
-		if (status != kWarpStatusOK)
-		{
-			warpPrint("readRTCRegisterRV8803C7(kWarpRV8803RegExt, &tmpRV8803RegisterByte) failed\n");
-		}
-		else
-		{
-			warpPrint("kWarpRV8803RegExt = [0x%X]\n", tmpRV8803RegisterByte);
-		}
+	// 	status = readRTCRegisterRV8803C7(kWarpRV8803RegExt, &tmpRV8803RegisterByte);
+	// 	if (status != kWarpStatusOK)
+	// 	{
+	// 		warpPrint("readRTCRegisterRV8803C7(kWarpRV8803RegExt, &tmpRV8803RegisterByte) failed\n");
+	// 	}
+	// 	else
+	// 	{
+	// 		warpPrint("kWarpRV8803RegExt = [0x%X]\n", tmpRV8803RegisterByte);
+	// 	}
 
-		status = readRTCRegisterRV8803C7(kWarpRV8803RegFlag, &tmpRV8803RegisterByte);
-		if (status != kWarpStatusOK)
-		{
-			warpPrint("readRTCRegisterRV8803C7(kWarpRV8803RegFlag, &tmpRV8803RegisterByte) failed\n");
-		}
-		else
-		{
-			warpPrint("kWarpRV8803RegFlag = [0x%X]\n", tmpRV8803RegisterByte);
-		}
+	// 	status = readRTCRegisterRV8803C7(kWarpRV8803RegFlag, &tmpRV8803RegisterByte);
+	// 	if (status != kWarpStatusOK)
+	// 	{
+	// 		warpPrint("readRTCRegisterRV8803C7(kWarpRV8803RegFlag, &tmpRV8803RegisterByte) failed\n");
+	// 	}
+	// 	else
+	// 	{
+	// 		warpPrint("kWarpRV8803RegFlag = [0x%X]\n", tmpRV8803RegisterByte);
+	// 	}
 
-		status = readRTCRegisterRV8803C7(kWarpRV8803RegCtrl, &tmpRV8803RegisterByte);
-		if (status != kWarpStatusOK)
-		{
-			warpPrint("readRTCRegisterRV8803C7(kWarpRV8803RegCtrl, &tmpRV8803RegisterByte) failed\n");
-		}
-		else
-		{
-			warpPrint("kWarpRV8803RegCtrl = [0x%X]\n", tmpRV8803RegisterByte);
-		}
+	// 	status = readRTCRegisterRV8803C7(kWarpRV8803RegCtrl, &tmpRV8803RegisterByte);
+	// 	if (status != kWarpStatusOK)
+	// 	{
+	// 		warpPrint("readRTCRegisterRV8803C7(kWarpRV8803RegCtrl, &tmpRV8803RegisterByte) failed\n");
+	// 	}
+	// 	else
+	// 	{
+	// 		warpPrint("kWarpRV8803RegCtrl = [0x%X]\n", tmpRV8803RegisterByte);
+	// 	}
 
-		warpPrint("About to configureSensorBME680() for measurement...\n");
-		status = configureSensorBME680(	0b00000001,	/*	payloadCtrl_Hum: Humidity oversampling (OSRS) to 1x				*/
-						0b00100100,	/*	payloadCtrl_Meas: Temperature oversample 1x, pressure overdsample 1x, mode 00	*/
-						0b00001000	/*	payloadGas_0: Turn off heater							*/
-						);
-		if (status != kWarpStatusOK)
-		{
-			warpPrint("configureSensorBME680() failed...\n");
-		}
+	// 	warpPrint("About to configureSensorBME680() for measurement...\n");
+	// 	status = configureSensorBME680(	0b00000001,	/*	payloadCtrl_Hum: Humidity oversampling (OSRS) to 1x				*/
+	// 					0b00100100,	/*	payloadCtrl_Meas: Temperature oversample 1x, pressure overdsample 1x, mode 00	*/
+	// 					0b00001000	/*	payloadGas_0: Turn off heater							*/
+	// 					);
+	// 	if (status != kWarpStatusOK)
+	// 	{
+	// 		warpPrint("configureSensorBME680() failed...\n");
+	// 	}
 
-		warpDisableI2Cpins();
+	// 	warpDisableI2Cpins();
 
-		warpPrint("About to loop with printSensorDataBME680()...\n");
-		while (1)
-		{
-			blinkLED(kGlauxPinLED);
-			for (int i = 0; i < kGlauxSensorRepetitionsPerSleepIteration; i++)
-			{
-				printAllSensors(true /* printHeadersAndCalibration */, true /* hexModeFlag */, 0 /* menuDelayBetweenEachRun */, true /* loopForever */);
-			}
+	// 	warpPrint("About to loop with printSensorDataBME680()...\n");
+	// 	while (1)
+	// 	{
+	// 		blinkLED(kGlauxPinLED);
+	// 		for (int i = 0; i < kGlauxSensorRepetitionsPerSleepIteration; i++)
+	// 		{
+	// 			printAllSensors(true /* printHeadersAndCalibration */, true /* hexModeFlag */, 0 /* menuDelayBetweenEachRun */, true /* loopForever */);
+	// 		}
 
-			warpPrint("About to configureSensorBME680() for sleep...\n");
-			status = configureSensorBME680(	0b00000000,	/*	payloadCtrl_Hum: Sleep							*/
-							0b00000000,	/*	payloadCtrl_Meas: No temperature samples, no pressure samples, sleep	*/
-							0b00001000	/*	payloadGas_0: Turn off heater						*/
-						);
-			if (status != kWarpStatusOK)
-			{
-				warpPrint("configureSensorBME680() failed...\n");
-			}
-			warpDisableI2Cpins();
-			blinkLED(kGlauxPinLED);
+	// 		warpPrint("About to configureSensorBME680() for sleep...\n");
+	// 		status = configureSensorBME680(	0b00000000,	/*	payloadCtrl_Hum: Sleep							*/
+	// 						0b00000000,	/*	payloadCtrl_Meas: No temperature samples, no pressure samples, sleep	*/
+	// 						0b00001000	/*	payloadGas_0: Turn off heater						*/
+	// 					);
+	// 		if (status != kWarpStatusOK)
+	// 		{
+	// 			warpPrint("configureSensorBME680() failed...\n");
+	// 		}
+	// 		warpDisableI2Cpins();
+	// 		blinkLED(kGlauxPinLED);
 
-			warpPrint("About to go into VLLS0 for 30 (was 60*60) seconds (will reset afterwords)...\n");
-			status = warpSetLowPowerMode(kWarpPowerModeVLLS0, kGlauxSleepSecondsBetweenSensorRepetitions /* sleep seconds */);
+	// 		warpPrint("About to go into VLLS0 for 30 (was 60*60) seconds (will reset afterwords)...\n");
+	// 		status = warpSetLowPowerMode(kWarpPowerModeVLLS0, kGlauxSleepSecondsBetweenSensorRepetitions /* sleep seconds */);
 
-			if (status != kWarpStatusOK)
-			{
-				warpPrint("warpSetLowPowerMode(kWarpPowerModeVLLS0, 10)() failed...\n");
-			}
-			warpPrint("Should not get here...");
-		}
-	#endif
+	// 		if (status != kWarpStatusOK)
+	// 		{
+	// 			warpPrint("warpSetLowPowerMode(kWarpPowerModeVLLS0, 10)() failed...\n");
+	// 		}
+	// 		warpPrint("Should not get here...");
+	// 	}
+	// #endif
 
 	// CW2 Question 8 - call devSSD1331 initialisation code
 	devSSD1331init();
@@ -2056,17 +2056,35 @@ main(void)
 	// CW3 Question 1: read current from INA219
 	// Print current values to terminal
 	// Can use RTT Viewer to log terminal output
-	warpPrint("Current (uA), Bus (mV)");
-	int i;
-	for (i=0; i<1000; i++)
-	{
-		int currentMicroamperes = readCurrentINA219(status);
-		int busMillivolts = readBusVoltageINA219(status);
+	// warpPrint("Current (uA), Bus (mV)");
+	// int i;
+	// for (i=0; i<1000; i++)
+	// {
+	// 	int currentMicroamperes = readCurrentINA219(status);
+	// 	int busMillivolts = readBusVoltageINA219(status);
 
-		warpPrint("%d, %d\n", currentMicroamperes, busMillivolts);
+	// 	warpPrint("%d, %d\n", currentMicroamperes, busMillivolts);
+	// }
+
+	// CW4
+	// Set SYSMOD to 01 (wake mode)
+	writeSensorRegisterMMA8451Q(0x2a, 0x01);
+
+	// Implementing step detection algorithm
+	while (1)
+	{
+		// warpPrint("test before function called\n");
+		detectWalkingMMA8451Q();
 	}
 
-	while (1)
+	warpPrint("X Y Z\n");
+	for (int i=0; i<500; i++)
+	{
+		printSensorDataMMA8451Q(0);
+	}
+
+	// Add this back for normal Warp boot menu
+	while (0)
 	{
 		/*
 		 *	Do not, e.g., lowPowerPinStates() on each iteration, because we actually
@@ -2607,13 +2625,13 @@ main(void)
 			/*
 			 *	Sleep for 30 seconds.
 			 */
-			case 'k':
-			{
-				warpPrint("\r\n\tSleeping until system reset...\n");
-				sleepUntilReset();
+			// case 'k':
+			// {
+			// 	warpPrint("\r\n\tSleeping until system reset...\n");
+			// 	fReset();
 
-				break;
-			}
+			// 	break;
+			// }
 
 			/*
 			 *	Send repeated byte on I2C or SPI
@@ -2675,30 +2693,30 @@ main(void)
 			/*
 			 *	Switch to VLPR
 			 */
-			case 'p':
-			{
-				status = warpSetLowPowerMode(kWarpPowerModeVLPR, 0 /* sleep seconds : irrelevant here */);
-				if ((status != kWarpStatusOK) && (status != kWarpStatusPowerTransitionErrorVlpr2Vlpr))
-				{
-					warpPrint("warpSetLowPowerMode(kWarpPowerModeVLPR, 0 /* sleep seconds : irrelevant here */)() failed...\n");
-				}
+			// case 'p':
+			// {
+			// 	status = warpSetLowPowerMode(kWarpPowerModeVLPR, 0 /* sleep seconds : irrelevant here */);
+			// 	if ((status != kWarpStatusOK) && (status != kWarpStatusPowerTransitionErrorVlpr2Vlpr))
+			// 	{
+			// 		warpPrint("warpSetLowPowerMode(kWarpPowerModeVLPR, 0 /* sleep seconds : irrelevant here */)() failed...\n");
+			// 	}
 
-				break;
-			}
+			// 	break;
+			// }
 
 			/*
 			 *	Switch to RUN
 			 */
-			case 'r':
-			{
-				warpSetLowPowerMode(kWarpPowerModeRUN, 0 /* sleep seconds : irrelevant here */);
-				if (status != kWarpStatusOK)
-				{
-					warpPrint("warpSetLowPowerMode(kWarpPowerModeRUN, 0 /* sleep seconds : irrelevant here */)() failed...\n");
-				}
+			// case 'r':
+			// {
+			// 	warpSetLowPowerMode(kWarpPowerModeRUN, 0 /* sleep seconds : irrelevant here */);
+			// 	if (status != kWarpStatusOK)
+			// 	{
+			// 		warpPrint("warpSetLowPowerMode(kWarpPowerModeRUN, 0 /* sleep seconds : irrelevant here */)() failed...\n");
+			// 	}
 
-				break;
-			}
+			// 	break;
+			// }
 
 			/*
 			 *	Power up all sensors
@@ -2734,21 +2752,21 @@ main(void)
 
 				break;
 			}
-#if (WARP_BUILD_ENABLE_DEVRV8803C7)
-			case 'v':
-			{
-				warpPrint("\r\n\tSleeping for 3 seconds, then resetting\n");
-				warpSetLowPowerMode(kWarpPowerModeVLLS0, 3 /* sleep seconds */);
-				if (status != kWarpStatusOK)
-				{
-					warpPrint("warpSetLowPowerMode(kWarpPowerModeVLLS0, 3 /* sleep seconds : irrelevant here */)() failed...\n");
-				}
+// #if (WARP_BUILD_ENABLE_DEVRV8803C7)
+// 			case 'v':
+// 			{
+// 				warpPrint("\r\n\tSleeping for 3 seconds, then resetting\n");
+// 				warpSetLowPowerMode(kWarpPowerModeVLLS0, 3 /* sleep seconds */);
+// 				if (status != kWarpStatusOK)
+// 				{
+// 					warpPrint("warpSetLowPowerMode(kWarpPowerModeVLLS0, 3 /* sleep seconds : irrelevant here */)() failed...\n");
+// 				}
 
-				warpPrint("\r\n\tThis should never happen...\n");
+// 				warpPrint("\r\n\tThis should never happen...\n");
 
-				break;
-			}
-#endif
+// 				break;
+// 			}
+// #endif
 			/*
 			 *	Simply spin for 10 seconds. Since the SWD pins should only be enabled when we are waiting for key at top of loop (or toggling after printf), during this time there should be no interference from the SWD.
 			 */
@@ -3410,7 +3428,7 @@ loopForSensor(	const char *  tagString,
 		{
 			// TODO generalise this - make a variable - number of bytes to read should be 2 for certain registers
 			// but usually 1
-			status = readSensorRegisterFunction(address+j, 2 /* numberOfBytes */);
+			status = readSensorRegisterFunction(address+j, 1 /* numberOfBytes */);
 			if (status == kWarpStatusOK)
 			{
 				nSuccesses++;
